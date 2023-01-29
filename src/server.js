@@ -13,7 +13,7 @@ const parser = new parsers.Readline({
     delimiter: '\r\n'
 });
 
-var port = new SerialPort('/dev/cu.usbserial-140',{
+var port = new SerialPort('/dev/cu.usbserial-130',{
     baudRate: 9600,
     dataBits: 8,
     parity: 'none',
@@ -30,10 +30,10 @@ const io = new Server(server, {
         origin: 'http://localhost:3000'
     }
 });
-start = Date.now()
 
 io.on('connection', (socket) => {
     console.log('node is listening');
+    start = Date.now()
     parser.on('data', (data) => {
         //console.log(data);
         socket.broadcast.emit('data', {

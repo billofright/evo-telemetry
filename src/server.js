@@ -1,3 +1,6 @@
+const browserEnv = require('browser-env')
+browserEnv(['navigator']);
+
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -13,7 +16,7 @@ const parser = new parsers.Readline({
     delimiter: '\r\n'
 });
 
-var port = new SerialPort('/dev/cu.usbserial-130',{
+var port = new SerialPort('/dev/cu.usbserial-140',{
     baudRate: 9600,
     dataBits: 8,
     parity: 'none',
@@ -35,7 +38,6 @@ io.on('connection', (socket) => {
     console.log('node is listening');
     start = Date.now()
     parser.on('data', (data) => {
-        //console.log(data);
         socket.broadcast.emit('data', {
             time: (Date.now() - start)/1000,
             value: data

@@ -8,8 +8,13 @@ import "chartjs-adapter-date-fns";
 Chart.register(TimeScale, LinearScale, LineController, PointElement, LineElement);
 
 const socket = io.connect('http://localhost:3001');
+var recording = false;
 
 function App() {
+  const startRecording = function(data) {
+    recording = true;
+  }
+
   window.onload = function() {
     console.log('LOADED');
 
@@ -58,7 +63,76 @@ function App() {
           fontSize: 18
         },
         animation: {
-          duration: 10
+          duration: 0
+        },
+      })
+    });
+
+    var chart2 = new Chart(document.getElementById('chart2'), {
+      type:'line',
+      data: {
+        datasets:[{
+          label: 'Temperature',
+          data: 0,
+          fill: false,
+          borderColor: '#343e9a',
+          borderWidth: 1
+        }]
+      },
+      options: Object.assign({}, commonOptions, {
+        title:{
+          display: true,
+          text: 'Temperature',
+          fontSize: 18
+        },
+        animation: {
+          duration: 0
+        },
+      })
+    });
+
+    var chart3 = new Chart(document.getElementById('chart3'), {
+      type:'line',
+      data: {
+        datasets:[{
+          label: 'Temperature',
+          data: 0,
+          fill: false,
+          borderColor: '#343e9a',
+          borderWidth: 1
+        }]
+      },
+      options: Object.assign({}, commonOptions, {
+        title:{
+          display: true,
+          text: 'Temperature',
+          fontSize: 18
+        },
+        animation: {
+          duration: 0
+        },
+      })
+    });
+
+    var chart4 = new Chart(document.getElementById('chart4'), {
+      type:'line',
+      data: {
+        datasets:[{
+          label: 'Temperature',
+          data: 0,
+          fill: false,
+          borderColor: '#343e9a',
+          borderWidth: 1
+        }]
+      },
+      options: Object.assign({}, commonOptions, {
+        title:{
+          display: true,
+          text: 'Temperature',
+          fontSize: 18
+        },
+        animation: {
+          duration: 0
         },
       })
     });
@@ -83,10 +157,20 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Current temperature</h1>
-      <div id='tempContainer' className='container'>
-        <div id='temp' className='temp'>
+      <h1>Data</h1>
+      {/* <button id='start' className='button' onClick={startRecording}>start recording</button> */}
+      <div id='charts' className='charts-container'>
+        <div id='tempContainer' className='container'>
           <canvas id='tempChart'></canvas>
+        </div>
+        <div id='chart2Container' className='container'>
+          <canvas id='chart2'></canvas>
+        </div>
+        <div id='chart3Container' className='container'>
+          <canvas id='chart3'></canvas>
+        </div>
+        <div id='chart4Container' className='container'>
+          <canvas id='chart4'></canvas>
         </div>
       </div>
     </div>

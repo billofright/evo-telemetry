@@ -1,7 +1,23 @@
+html{
+  margin: 1rem;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
-  margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  text-align: center;
+}
+
+.charts-container{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  /* overflow-x: hidden;
+  overflow-y: scroll; */
+}
+
+.chart{
+  padding: 1rem;
+  width: 33%;
+  height: 24rem;
 }

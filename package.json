@@ -21,7 +21,8 @@
     "chart.js": "^4.2.1",
     "chartjs-adapter-moment": "^1.0.1",
     "electron-squirrel-startup": "^1.0.0",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "socket.io": "^4.6.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.5",

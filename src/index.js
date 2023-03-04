@@ -1,18 +1,21 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
 const createWindow = () => {
+  require('@electron/remote/main').initialize();
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 900,
     webPreferences: {
       nodeIntegration: true,
+      enableRemoteModule: true,
       contextIsolation: false,
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -29,6 +32,10 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
+
+app.on('browser-window-created', (_, window) => {
+  require("@electron/remote/main").enable(window.webContents)
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

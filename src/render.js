@@ -1,6 +1,7 @@
 const socket = new io('ws://localhost:8080');
 
 const button = document.getElementById('button')
+const portSelectBtn = document.getElementById('portSelectBtn');
 const seconds = document.getElementById('seconds');
 const tempChart = document.getElementById('tempChart');
 const chart2 = document.getElementById('chart2');
@@ -8,7 +9,12 @@ const chart3 = document.getElementById('chart3');
 const chart4 = document.getElementById('chart4');
 
 require('chartjs-adapter-moment');
+const { Menu } = require('@electron/remote');
 const { Chart } = require('chart.js/auto');
+const { autoDetect } = require('@serialport/bindings-cpp')
+let serialport = require('serialport');
+
+const Binding = autoDetect()
 
 var updateInterval = 20;
 var numberElements = 50;
@@ -16,7 +22,40 @@ var numberElements = 50;
 var updateCount = 0;
 
 button.onclick = () => {
-    socket.emit('start', 0)
+    if(button.innerText == 'Start'){
+        socket.emit('start');
+        socket.on('message', updateChart);
+        button.innerText = 'Stop';
+    }
+    else{
+        socket.emit('stop');
+        socket.off('message', updateChart);
+        button.innerText = 'Start';
+        clearData(tempChartInstance);
+    }
+    
+}
+
+portSelectBtn.onclick = getSerialPorts;
+
+async function getSerialPorts() {
+    const serialPorts = await Binding.list();
+
+    const portsMenu = Menu.buildFromTemplate(
+        serialPorts.map(port => {
+            return {
+                label: port.path,
+                click: () => selectPort(port)
+            };
+        })
+    );
+
+    portsMenu.popup();
+}
+
+async function selectPort(port) {
+    portSelectBtn.innerText = port.path;
+    socket.emit('portSelect', port)
 }
 
 var commonOptions = {
@@ -147,8 +186,12 @@ function addData(chart, data){
         chart.update();
     }
 };
+
+function clearData(chart){
+    chart.data.datasets.data = [];
+}
   
-socket.on('message', (data) => {
+const updateChart = ('message', (data) => {
     seconds.innerHTML = data.time
     addData(tempChartInstance, data.temp);
     addData(chart2Instance, data.data2);

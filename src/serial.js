@@ -1,6 +1,6 @@
 const http = require('http').createServer();
 var { SerialPort, ReadlineParser } = require('serialport');
-const parser = new ReadlineParser();
+const parser = new ReadlineParser({delimiter: '\r\n'});
 
 const fs = require('fs');
 
@@ -8,38 +8,52 @@ const io = require('socket.io')(http, {
     cors: {origin: '*'}
 });
 
-function getRand(max) {
-    return Math.random() * max;
-} 
+function emptyData(date) {
+    return {
+        name: date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" + ("0" + date.getDate()).slice(-2) + "_" + date.getHours() + "-" + date.getMinutes() + "-" + date.getSeconds(),
+        data: {
+            temp:[],
+            data2:[],
+            data3:[],
+            data4:[]
+        }
+    }
+}
 
 io.on('connection', (socket) => {
     console.log('connection success')
     socket.once('start', text => {
-        const writeStream = fs.createWriteStream('data.csv');
-        writeStream.write("temp,data2,data3,data4\n");
         start = Date.now();
+        let recording = emptyData(new Date());
         parser.on('data', async (data) => {            
             let split = data.split(',');
-
-            const overWatermark = writeStream.write(data);
-
-            if(!overWatermark){
-                await new Promise((resolve) => 
-                    writeStream.once('drain', resolve)
-                );
+            let dataLine = Array(split.length);
+            for(let i = 0; i < split.length; i++){
+                dataLine[i] = parseFloat(split[i]);
             }
+
+            recording.data.temp.push(dataLine[0]);
+            recording.data.data2.push(dataLine[1]);
+            recording.data.data3.push(dataLine[2]);
+            recording.data.data4.push(dataLine[3]);
 
             socket.emit('message', {
                 time: (Date.now() - start)/1000,
-                temp: split[0],
-                data2: split[1],
-                data3: split[2],
-                data4: split[3]
+                temp: dataLine[0],
+                data2: dataLine[1],
+                data3: dataLine[2],
+                data4: dataLine[3]
             });
 
             socket.on('stop', () => {
-                writeStream.end();
-            })
+                dataString = JSON.stringify(recording, null, 2);
+                fs.writeFile(`data_logs/${recording.name}.json`, dataString, err => {
+                    if(err){
+                        console.log(err);
+                    }
+                });
+                // recording = emptyData(new Date());
+            });
 
         });
     });

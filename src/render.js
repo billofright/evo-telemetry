@@ -2,6 +2,7 @@ const socket = new io('ws://localhost:8080');
 
 const button = document.getElementById('button')
 const portSelectBtn = document.getElementById('portSelectBtn');
+const logSelectBtn = document.getElementById('logSelectBtn');
 const seconds = document.getElementById('seconds');
 const tempChart = document.getElementById('tempChart');
 const chart2 = document.getElementById('chart2');
@@ -13,25 +14,31 @@ const { Menu } = require('@electron/remote');
 const { Chart } = require('chart.js/auto');
 const { autoDetect } = require('@serialport/bindings-cpp')
 let serialport = require('serialport');
+const fs = require('fs');
+const path = require('path');
 
 const Binding = autoDetect()
 
 var updateInterval = 20;
-var numberElements = 50;
+var numberElements = 40;
 
 var updateCount = 0;
 
 button.onclick = () => {
     if(button.innerText == 'Start'){
+        clearData(tempChartInstance);
+        clearData(chart2Instance);
+        clearData(chart3Instance);
+        clearData(chart4Instance);
         socket.emit('start');
         socket.on('message', updateChart);
         button.innerText = 'Stop';
+
     }
-    else{
+    else{        
         socket.emit('stop');
         socket.off('message', updateChart);
         button.innerText = 'Start';
-        clearData(tempChartInstance);
     }
     
 }
@@ -57,6 +64,44 @@ async function selectPort(port) {
     portSelectBtn.innerText = port.path;
     socket.emit('portSelect', port)
 }
+
+logSelectBtn.onclick = getLogs;
+
+async function getLogs(){
+    let logs = [];
+
+    fs.readdirSync('data_logs').forEach(file => {
+        logs.push(file);
+    })
+
+    const logsMenu = Menu.buildFromTemplate(
+        logs.map(file => {
+            return {
+                label: file,
+                click: () => selectLog(file)
+            };
+        })
+    );
+
+    logsMenu.popup();
+
+}
+
+async function selectLog(file){
+    logSelectBtn.innerText = file;
+    filePath = `data_logs/${file}`;
+    if(fs.existsSync(filePath)) {
+        const data = JSON.parse(fs.readFileSync(filePath).toString());
+        loadData(tempChartInstance, data.data.temp);
+        loadData(chart2Instance, data.data.data2);
+        loadData(chart3Instance, data.data.data3);
+        loadData(chart4Instance, data.data.data4);
+
+    }
+    else console.log('file does not exist');
+}
+
+
 
 var commonOptions = {
     responsive: true,
@@ -175,9 +220,11 @@ var chart4Instance = new Chart(chart4, {
 });
 
 function addData(chart, data){
-    if(data){
+    if(data != null){
         chart.data.labels.push(new Date());
-        chart.data.datasets.forEach((dataset) => {dataset.data.push(data)});
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.push(data);
+        });
         if(updateCount > numberElements){
             chart.data.labels.shift();
             chart.data.datasets[0].data.shift();
@@ -187,8 +234,23 @@ function addData(chart, data){
     }
 };
 
+function loadData(chart, data){
+    timeScale = [];
+    for(let i = 0; i < data.length; i++){
+        timeScale.push(i);
+    }
+    
+    chart.data.labels = timeScale;
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data = data;
+    });
+    chart.update();
+}
+
 function clearData(chart){
+    chart.data.labels = [];
     chart.data.datasets.data = [];
+    chart.update();
 }
   
 const updateChart = ('message', (data) => {

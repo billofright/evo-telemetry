@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0/dist/chartjs-adapter-luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0/dist/chartjs-plugin-streaming.min.js"></script>
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -9,7 +13,6 @@
     />
     <link rel="stylesheet" href="index.css" />
     <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
-    <script defer src="render.js"></script>
   </head>
   <body>
     <h1>Data</h1>
@@ -36,4 +39,5 @@
       Select log
     </button>
   </body>
+  <script src="render.js"></script>
 </html>

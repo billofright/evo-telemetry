@@ -9,9 +9,9 @@ const chart2 = document.getElementById('chart2');
 const chart3 = document.getElementById('chart3');
 const chart4 = document.getElementById('chart4');
 
-require('chartjs-adapter-moment');
+//require('chartjs-adapter-moment');
 const { Menu } = require('@electron/remote');
-const { Chart } = require('chart.js/auto');
+//const { Chart } = require('chart.js/auto');
 const { autoDetect } = require('@serialport/bindings-cpp')
 let serialport = require('serialport');
 const fs = require('fs');
@@ -30,6 +30,7 @@ button.onclick = () => {
         clearData(chart2Instance);
         clearData(chart3Instance);
         clearData(chart4Instance);
+        logSelectBtn.disabled = true;
         socket.emit('start');
         socket.on('message', updateChart);
         button.innerText = 'Stop';
@@ -39,6 +40,7 @@ button.onclick = () => {
         socket.emit('stop');
         socket.off('message', updateChart);
         button.innerText = 'Start';
+        logSelectBtn.disabled = false;
     }
     
 }
@@ -102,29 +104,20 @@ async function selectLog(file){
 }
 
 
-
 var commonOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
         x: {
-            type: 'time',
-            time: {
-                displayFormats: {
-                    millisecond: 'mm:ss:SSS'
-                }
-            }
-            
+            type: 'realtime',
         },
         y: {
-            ticks: {
-                beginAtZero:true
-            }
+            beginAtZero:true
         }
     },
     legend: {display: false},
     tooltips:{
-    enabled: true
+        enabled: true
     }
 };
 var tempChartInstance = new Chart(tempChart, {
@@ -154,7 +147,7 @@ var chart2Instance = new Chart(chart2, {
     type:'line',
     data: {
         datasets:[{
-            label: 'Chart2',
+            label: 'Joystick X',
             data: 0,
             fill: false,
             borderColor: '#343e9a',
@@ -177,7 +170,7 @@ var chart3Instance = new Chart(chart3, {
     type:'line',
     data: {
         datasets:[{
-            label: 'Chart3',
+            label: 'Joystick Y',
             data: 0,
             fill: false,
             borderColor: '#343e9a',
@@ -200,7 +193,7 @@ var chart4Instance = new Chart(chart4, {
     type:'line',
     data: {
         datasets:[{
-            label: 'Chart4',
+            label: 'Rotary Encoder Ticks',
             data: 0,
             fill: false,
             borderColor: '#343e9a',
@@ -237,7 +230,7 @@ function addData(chart, data){
 function loadData(chart, data){
     timeScale = [];
     for(let i = 0; i < data.length; i++){
-        timeScale.push(i);
+        timeScale.push(i*250);
     }
     
     chart.data.labels = timeScale;
